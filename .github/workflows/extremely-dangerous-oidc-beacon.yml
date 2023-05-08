@@ -35,6 +35,7 @@ jobs:
       # Wait 5 minutes before generating another token.
       - run: sleep 300
   extremely-dangerous-oidc-broadcaster-leak-second:
+    needs: extremely-dangerous-oidc-broadcaster-leak-first
     permissions:
       # Needed to access the workflow's OIDC identity.
       id-token: write
@@ -44,6 +45,7 @@ jobs:
       # Wait 5 minutes before generating another token.
       - run: sleep 300
   extremely-dangerous-oidc-broadcaster-leak-third:
+    needs: extremely-dangerous-oidc-broadcaster-leak-second
     permissions:
       # Needed to access the workflow's OIDC identity.
       id-token: write
