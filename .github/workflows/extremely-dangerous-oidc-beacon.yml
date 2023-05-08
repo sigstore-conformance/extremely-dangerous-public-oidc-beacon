@@ -21,23 +21,32 @@ concurrency:
   group: oidc-beacon
   cancel-in-progress: true
 
+# We generate 3 tokens per workflow run using identical jobs to work around GitHub Actions scheduling
+# limitations. Each new token overwrites the previous token associated with the workflow artifact bundle,
+# if it exists. Each run should take around 10 minutes to complete.
 jobs:
-  extremely-dangerous-oidc-broadcaster:
+  extremely-dangerous-oidc-broadcaster-leak-first:
     permissions:
       # Needed to access the workflow's OIDC identity.
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.7"
-      - name: Retrieve OIDC token
-        run: |
-          python -m pip install id &&
-          python -m id sigstore > ./oidc-token.txt
-      - name: Upload OIDC token artifact
-        uses: actions/upload-artifact@v3.1.0
-        with:
-          name: oidc-token
-          path: ./oidc-token.txt
+      - uses: ./
+      # Wait 5 minutes before generating another token.
+      - run: sleep 300
+  extremely-dangerous-oidc-broadcaster-leak-second:
+    permissions:
+      # Needed to access the workflow's OIDC identity.
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./
+      # Wait 5 minutes before generating another token.
+      - run: sleep 300
+  extremely-dangerous-oidc-broadcaster-leak-third:
+    permissions:
+      # Needed to access the workflow's OIDC identity.
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./

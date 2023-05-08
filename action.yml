@@ -1,0 +1,25 @@
+name: Extremely dangerous OIDC public beacon
+description: |
+  This action retrieves an OIDC identity token from GitHub Actions
+  and INTENTIONALLY leaks it as an artifact. As a result, the leaked
+  token is NOT SECRET AND MUST NOT BE CONSIDERED A VALID IDENTITY
+  FOR SIGNING OR ANY OTHER PURPOSE.
+runs:
+  using: composite
+  permissions:
+    # Needed to access the workflow's OIDC identity.
+    id-token: write
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.7"
+    - name: Retrieve OIDC token
+      run: |
+        python -m pip install id &&
+        python -m id sigstore > ./oidc-token.txt
+    - name: Upload OIDC token artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: oidc-token
+        path: ./oidc-token.txt
