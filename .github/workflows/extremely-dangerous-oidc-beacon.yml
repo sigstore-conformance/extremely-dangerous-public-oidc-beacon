@@ -7,20 +7,13 @@
 
 name: Extremely dangerous OIDC beacon
 
-# Run every 5 minutes so we always have a valid OIDC token for clients to use.
+# Allow this job to be called from `trigger-extremely-dangerous-oidc-beacon.yml`.
 on:
-  schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
-
-# Make sure we cancel any in-progress OIDC generation jobs if they're already queued.
-#
-# When there's heavy traffic in the GitHub queue, we're not going to be able to keep up with
-# generating tokens every 5 minutes and we want to ensure that we don't overlap and queue multiple
-# jobs at once.
-concurrency:
-  group: oidc-beacon
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+      sleep-duration:
+        type: number
+        required: true
 
 # We generate 3 tokens per workflow run using identical jobs to work around GitHub Actions scheduling
 # limitations. Each new token overwrites the previous token associated with the workflow artifact bundle,
@@ -31,13 +24,10 @@ jobs:
       # Needed to access the workflow's OIDC identity.
       id-token: write
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 1
-      matrix:
-        # With `max-parallel: 1`, GHA should start the matrix items in the defined order.
-        # https://github.com/actions/runner/issues/703
-        sleep-duration: [300, 300, 0]
     steps:
+      - name: Wait for previous token to expire
+        run: |
+          sleep ${{ inputs.sleep-duration }}
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -51,6 +41,3 @@ jobs:
         with:
           name: oidc-token
           path: ./oidc-token.txt
-      - name: Wait 5 minutes before leaking another token
-        run: |
-          sleep ${{ matrix.sleep-duration }}
