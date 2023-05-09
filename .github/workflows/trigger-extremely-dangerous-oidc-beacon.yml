@@ -69,7 +69,8 @@ jobs:
           curl -L \
             --fail \
             -X POST \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "${REPO_URL}/actions/workflows/${BEACON_NAME}/dispatches"
-            -d '{"ref":"${GITHUB_REF_NAME}"}'
+            "${REPO_URL}/actions/workflows/${BEACON_NAME}/dispatches" \
+            -d '{"ref":"${{ github.ref }}"}' \
