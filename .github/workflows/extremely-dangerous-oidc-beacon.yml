@@ -7,20 +7,12 @@
 
 name: Extremely dangerous OIDC beacon
 
-# Run every 5 minutes so we always have a valid OIDC token for clients to use.
-on:
-  schedule:
-    - cron: '*/5 * * * *'
+# Allow this job to be called from `trigger-extremely-dangerous-oidc-beacon.yml`.
+on: [workflow_dispatch]
 
-# Make sure we cancel any in-progress OIDC generation jobs if they're already queued.
-#
-# When there's heavy traffic in the GitHub queue, we're not going to be able to keep up with
-# generating tokens every 5 minutes and we want to ensure that we don't overlap and queue multiple
-# jobs at once.
-concurrency:
-  group: oidc-beacon
-  cancel-in-progress: true
-
+# We generate 3 tokens per workflow run using identical jobs to work around GitHub Actions scheduling
+# limitations. Each new token overwrites the previous token associated with the workflow artifact bundle,
+# if it exists. Each run should take around 10 minutes to complete.
 jobs:
   extremely-dangerous-oidc-broadcaster:
     permissions:
