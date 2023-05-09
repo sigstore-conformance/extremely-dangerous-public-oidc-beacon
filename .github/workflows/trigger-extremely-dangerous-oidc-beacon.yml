@@ -27,7 +27,12 @@ jobs:
       matrix:
         # With `max-parallel: 1`, GHA should start the matrix items in the defined order.
         # https://github.com/actions/runner/issues/703
-        sleep-duration: [0, 300, 300]
+        # This number of runs should cover approximately an hour's worth of tokens.
+        sleep-duration:
+          [0, 300, 300,   # 15m
+          300, 300, 300,  # 30m
+          300, 300, 300,  # 45m
+          300, 300, 300]  # 60m
     runs-on: ubuntu-latest
     steps:
       - name: Wait for the previous token to expire
