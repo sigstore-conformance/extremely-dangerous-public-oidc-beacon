@@ -14,9 +14,11 @@ concurrency:
   group: oidc-beacon
   cancel-in-progress: true
 
-# We generate 3 tokens per workflow run using identical jobs to work around GitHub Actions scheduling
-# limitations. Each new token overwrites the previous token associated with the workflow artifact bundle,
-# if it exists. Each run should take around 10 minutes to complete.
+# We generate multiple tokens per workflow run using identical jobs to work
+# around GitHub Actions scheduling limitations. Each new token overwrites the
+# previous token associated with the workflow artifact bundle, if it exists.
+# Each run should take around 1 hour to complete, if allowed to run to
+# completion.
 jobs:
   trigger-extremely-dangerous-oidc-beacon:
     permissions:
@@ -25,9 +27,11 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        # With `max-parallel: 1`, GHA should start the matrix items in the defined order.
+        # With `max-parallel: 1`, GHA should start the matrix items in the
+        # defined order.
         # https://github.com/actions/runner/issues/703
-        # This number of runs should cover approximately an hour's worth of tokens.
+        # This number of runs should cover approximately an hour's worth of
+        # tokens.
         sleep-duration:
           [0, 300, 300,   # 15m
           300, 300, 300,  # 30m
