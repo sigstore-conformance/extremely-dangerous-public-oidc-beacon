@@ -1,17 +1,19 @@
 # extremely-dangerous-public-oidc-beacon
 
-This repository exists to provide a single workflow:
-`extremely-dangerous-oidc-beacon.yml`.
+This repository exists to provide two workflows:
+`extremely-dangerous-oidc-beacon.yml` and
+`trigger-extremely-dangerous-oidc-beacon.yml`.
 
-This workflow runs on a schedule, and *intentionally* leaks an OIDC identity
-token corresponding to its workflow identity. It does this so that members
-of the Sigstore community have access to a uniform identity token
+`trigger-extremely-dangerous-oidc-beacon.yml` dispatches
+`extremely-dnagerous-oidc-beacon.yml` on a schedule. The latter *intentionally*
+leaks an OIDC identity token corresponding to its workflow identity. It does this
+so that members of the Sigstore community have access to a uniform identity token
 for [conformance testing].
 
-This workflow is intentionally isolated in its own repository, within
+These workflows are intentionally isolated in their own repository, within
 an otherwise unused GitHub organization, to minimize the possibility
-that users will incorrectly trust these identity tokens. The workflow's
-name also includes `extremely-dangerous` to emphasize that identity tokens
-originating from it must not be trusted for anything except testing purposes.
+that users will incorrectly trust these identity tokens. The workflow
+names also include `extremely-dangerous` to emphasize that identity tokens
+originating from them must not be trusted for anything except testing purposes.
 
 [conformance testing]: https://github.com/sigstore/sigstore-conformance
