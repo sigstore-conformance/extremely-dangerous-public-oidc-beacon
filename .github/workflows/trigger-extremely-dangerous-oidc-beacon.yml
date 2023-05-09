@@ -4,7 +4,6 @@ name: Trigger for extremely dangerous OIDC beacon
 on:
   schedule:
     - cron: '*/5 * * * *'
-  workflow_dispatch:
 
 # Make sure we cancel any in-progress OIDC generation jobs if they're already queued.
 #
@@ -19,16 +18,22 @@ concurrency:
 # limitations. Each new token overwrites the previous token associated with the workflow artifact bundle,
 # if it exists. Each run should take around 10 minutes to complete.
 jobs:
-  trigger-extremely-dangerous-oidc-broadcaster:
+  trigger-extremely-dangerous-oidc-beacon:
     permissions:
-      # Needed to access the workflow's OIDC identity.
-      id-token: write
+      # Needed to trigger a new workflow run.
+      actions: write
     strategy:
       max-parallel: 1
       matrix:
         # With `max-parallel: 1`, GHA should start the matrix items in the defined order.
         # https://github.com/actions/runner/issues/703
         sleep-duration: [0, 30, 300]
-    uses: ./.github/workflows/extremely-dangerous-oidc-beacon.yml
-    with:
-      sleep-duration: ${{ matrix.sleep-duration }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for the previous token to expire
+        run: |
+          sleep ${{ matrix.sleep-duration }}
+      - name: Trigger OIDC beacon
+        uses: benc-uk/workflow-dispatch@v1.2.2
+        with:
+          workflow: extremely-dangerous-oidc-beacon.yml

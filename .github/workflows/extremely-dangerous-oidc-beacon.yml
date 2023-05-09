@@ -8,12 +8,7 @@
 name: Extremely dangerous OIDC beacon
 
 # Allow this job to be called from `trigger-extremely-dangerous-oidc-beacon.yml`.
-on:
-  workflow_call:
-    inputs:
-      sleep-duration:
-        type: number
-        required: true
+on: [workflow_dispatch]
 
 # We generate 3 tokens per workflow run using identical jobs to work around GitHub Actions scheduling
 # limitations. Each new token overwrites the previous token associated with the workflow artifact bundle,
@@ -25,9 +20,6 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for previous token to expire
-        run: |
-          sleep ${{ inputs.sleep-duration }}
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
