@@ -27,7 +27,7 @@ jobs:
       matrix:
         # With `max-parallel: 1`, GHA should start the matrix items in the defined order.
         # https://github.com/actions/runner/issues/703
-        sleep-duration: [0, 30, 300]
+        sleep-duration: [0, 300, 300]
     runs-on: ubuntu-latest
     steps:
       - name: Wait for the previous token to expire
