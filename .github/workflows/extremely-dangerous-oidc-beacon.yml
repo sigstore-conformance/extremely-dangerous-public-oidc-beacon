@@ -10,11 +10,13 @@ name: Extremely dangerous OIDC beacon
 # Allow this job to be called from `trigger-extremely-dangerous-oidc-beacon.yml`.
 on: [workflow_dispatch]
 
+permissions: {}
+
 # We generate 3 tokens per workflow run using identical jobs to work around GitHub Actions scheduling
 # limitations. Each new token overwrites the previous token associated with the workflow artifact bundle,
 # if it exists. Each run should take around 10 minutes to complete.
 jobs:
-  extremely-dangerous-oidc-broadcaster:
+  upload-extremely-dangerous-token:
     permissions:
       # Needed to access the workflow's OIDC identity.
       id-token: write
@@ -26,10 +28,29 @@ jobs:
           python-version: "3.x"
       - name: Retrieve OIDC token
         run: |
+          mkdir token_artifact_dir
           python -m pip install id &&
-          python -m id sigstore > ./oidc-token.txt
-      - name: Upload OIDC token artifact
+          python -m id sigstore > token_artifact_dir/oidc-token.txt
+      - name: Upload OIDC token artifact (legacy)
         uses: actions/upload-artifact@v3.1.0
         with:
           name: oidc-token
-          path: ./oidc-token.txt
+          path: token_artifact_dir/oidc-token.txt
+      - name: Upload OIDC token artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v2.0.0
+        with:
+          path: token_artifact_dir/
+
+  deploy-extremely-dangerous-token:
+    permissions:
+      pages: write
+      id-token: write # for authenticating to GH Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: upload-extremely-dangerous-token
+    steps:
+      - name: Deploy extremely dangerous token to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2.0.4
