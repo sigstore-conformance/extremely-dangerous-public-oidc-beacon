@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - name: Retrieve OIDC token
@@ -32,12 +32,12 @@ jobs:
           python -m pip install id &&
           python -m id sigstore > token_artifact_dir/oidc-token.txt
       - name: Upload OIDC token artifact (legacy)
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v4.0.0
         with:
           name: oidc-token
           path: token_artifact_dir/oidc-token.txt
       - name: Upload OIDC token artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v2.0.0
+        uses: actions/upload-pages-artifact@v3.0.0
         with:
           path: token_artifact_dir/
 
@@ -53,4 +53,4 @@ jobs:
     steps:
       - name: Deploy extremely dangerous token to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2.0.4
+        uses: actions/deploy-pages@v4.0.2
