@@ -32,7 +32,7 @@ jobs:
           python -m pip install id &&
           python -m id sigstore > token_artifact_dir/oidc-token.txt
       - name: Upload OIDC token artifact (legacy)
-        uses: actions/upload-artifact@v4.3.0
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: oidc-token
           path: token_artifact_dir/oidc-token.txt
@@ -53,4 +53,4 @@ jobs:
     steps:
       - name: Deploy extremely dangerous token to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4.0.3
+        uses: actions/deploy-pages@v4.0.4
