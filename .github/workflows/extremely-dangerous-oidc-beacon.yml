@@ -37,7 +37,7 @@ jobs:
           name: oidc-token
           path: token_artifact_dir/oidc-token.txt
       - name: Upload OIDC token artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v3.0.0
+        uses: actions/upload-pages-artifact@v3.0.1
         with:
           path: token_artifact_dir/
 
