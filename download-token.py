@@ -1,17 +1,20 @@
 # Fetch a cursed OIDC token from extremely-dangerous-public-oidc-beacon git
-# 
+#
 # This script exists for a few reasons:
 # * Multiple sigstore-related projects need a non-expired OIDC token for testing
 #   (and GitHub Actions tokens are not available in PRs for good reasons)
 # * extremely-dangerous-public-oidc-beacon project produces a token every few minutes but
 #   the tokens are short-lived: this means any fetching method with caching or latency
 #   of minutes will not work (this covers Github Pages and https://raw.githubusercontent.com/)
-# * There are times when there is no valid token available for a while
+# * There are still times when there is no valid token available for a while because GitHub
+#   schedule triggers are best-effort
+# * Accessing the tokens published as GitHub artifacts requires a GitHub token: this is
+#   inconvenient
 #
 # To counter all of these issues:
 # * use git to fetch token from "current-token" branch
-# * use pyjwt to check if token is invalid (or is just about to expire)
-# * retry a bit later
+# * use pyjwt to check if token is invalid
+# * retry a bit later if it is expired (or will soon expire)
 
 from datetime import datetime, timedelta
 import sys
@@ -27,7 +30,7 @@ import jwt
 MIN_VALIDITY = timedelta(seconds=10)
 MAX_RETRY_TIME = timedelta(minutes=5)
 RETRY_SLEEP_SECS = 30
-GIT_URL = "https://github.com/jku/extremely-dangerous-public-oidc-beacon.git"
+GIT_URL = "https://github.com/sigstore-conformance/extremely-dangerous-public-oidc-beacon.git"
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +49,7 @@ def is_valid_at(token_path: str, reference_time: datetime):
         "token is %s (ref time: %s, expiry: %s)",
         "valid" if valid else "expired",
         reference_time,
-        expiry
+        expiry,
     )
     return valid
 

@@ -27,7 +27,7 @@ names also include `extremely-dangerous` to emphasize that identity tokens
 originating from them must not be trusted for anything except testing purposes.
 
 Because GitHub workflow scheduling is best-effort, the published token may sometimes
-be expired for a while. Users may want to retry a little later in these cases (the
-provided GitHub Action handles this).
+be expired for a while. Users may want to retry a little later in these cases like
+the provided GitHub Action does.
 
 [conformance testing]: https://github.com/sigstore/sigstore-conformance
