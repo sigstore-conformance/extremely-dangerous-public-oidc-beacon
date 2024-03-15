@@ -7,11 +7,6 @@ runs:
   using: "composite"
 
   steps:
-    - name: Install dependencies
-      # this should be a no-op as it's already installed on GitHub runners
-      run: pip install pyjwt
-      shell: bash
-
     - name: Download token
       run: |
         python ${{ github.action_path }}/download-token.py

@@ -13,10 +13,12 @@
 #
 # To counter all of these issues:
 # * use git to fetch token from "current-token" branch
-# * use pyjwt to check if token is invalid
+# * parse jwt just enough to check token validity
 # * retry a bit later if it is expired (or will soon expire)
 
+from base64 import b64decode
 from datetime import datetime, timedelta
+import json
 import sys
 from tempfile import TemporaryDirectory
 import logging
@@ -24,8 +26,6 @@ import os
 import subprocess
 import shutil
 import time
-
-import jwt
 
 MIN_VALIDITY = timedelta(seconds=10)
 MAX_RETRY_TIME = timedelta(minutes=5)
@@ -37,13 +37,17 @@ logger = logging.getLogger(__name__)
 
 def git_clone(url: str, dir: str) -> None:
     base_cmd = ["git", "clone", "--quiet", "--branch", "current-token", "--depth", "1"]
-    subprocess.run(base_cmd + [url, dir])
+    subprocess.run(base_cmd + [url, dir], check=True)
 
 
-def is_valid_at(token_path: str, reference_time: datetime):
+def is_valid_at(token_path: str, reference_time: datetime) -> bool:
+    # read token, b64 decode (with padding), parse as json, validate expiry
     with open(token_path) as f:
-        token = jwt.decode(f.read().rstrip(), options={"verify_signature": False})
-    expiry = datetime.fromtimestamp(token["exp"])
+        payload = f.read().rstrip().split(".")[1]
+    payload += "=" * (4 - len(payload) % 4)
+    payload_json = json.loads(b64decode(payload))
+
+    expiry = datetime.fromtimestamp(payload_json["exp"])
     valid = reference_time < expiry
     logger.debug(
         "token is %s (ref time: %s, expiry: %s)",
