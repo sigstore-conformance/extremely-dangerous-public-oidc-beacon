@@ -1,0 +1,13 @@
+name: "Download cursed OIDC token"
+description: "Download an unsafe OIDC token to ./oidc-token.txt. This is useful for sigstore conformance testing"
+
+permissions: {}
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Download token
+      run: |
+        python ${{ github.action_path }}/download-token.py
+      shell: bash
