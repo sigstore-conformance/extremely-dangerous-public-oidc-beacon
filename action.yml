@@ -9,5 +9,5 @@ runs:
   steps:
     - name: Download token
       run: |
-        python ${{ github.action_path }}/download-token.py
+        python $GITHUB_ACTION_PATH/download-token.py
       shell: bash
