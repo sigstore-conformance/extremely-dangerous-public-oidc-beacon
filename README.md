@@ -14,7 +14,7 @@ working directory (`./oidc-token.txt`):
 ## Details
 
 The workflow `trigger-extremely-dangerous-oidc-beacon.yml` dispatches
-`extremely-dnagerous-oidc-beacon.yml` on a schedule. The latter *intentionally*
+`extremely-dangerous-oidc-beacon.yml` on a schedule. The latter *intentionally*
 leaks an OIDC identity token corresponding to its workflow identity. The token is
 made available in the workflow artifacts and also in an ephemeral (force-pushed)
 git branch
