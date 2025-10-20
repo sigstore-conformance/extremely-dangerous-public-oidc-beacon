@@ -5,7 +5,7 @@ name: Trigger for extremely dangerous OIDC beacon
 # around an hour elapse between jobs.
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: "*/5 * * * *"
 
 # Make sure we cancel any in-progress OIDC generation jobs if they're already queued.
 #
@@ -35,16 +35,16 @@ jobs:
         sleep-duration:
           - 0
           - 300
-          - 300  # 15m
+          - 300 # 15m
           - 300
           - 300
-          - 300  # 30m
+          - 300 # 30m
           - 300
           - 300
-          - 300  # 45m
+          - 300 # 45m
           - 300
           - 300
-          - 300  # 60m
+          - 300 # 60m
     runs-on: ubuntu-latest
     steps:
       - name: Wait for the previous token to expire
@@ -73,4 +73,4 @@ jobs:
             -H "Authorization: Bearer ${{ github.token }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "${REPO_URL}/actions/workflows/${BEACON_NAME}/dispatches" \
-            -d '{"ref":"${{ github.ref }}"}' \
+            -d '{"ref":"${GITHUB_REF}"}' \
