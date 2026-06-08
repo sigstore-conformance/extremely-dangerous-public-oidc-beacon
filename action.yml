@@ -3,6 +3,16 @@ description: "Download an unsafe OIDC token to ./oidc-token.txt. This is useful 
 
 permissions: {}
 
+inputs:
+  source:
+    description: >-
+      Where to fetch the token from: "github" (default) clones the current-token
+      git branch (a GitHub Actions identity token), or "google" fetches from the
+      GCS bucket (a Google service account identity token). These are different
+      identities, so "google" is opt-in.
+    required: false
+    default: "github"
+
 runs:
   using: "composite"
 
@@ -11,3 +21,5 @@ runs:
       run: |
         python $GITHUB_ACTION_PATH/download-token.py
       shell: bash
+      env:
+        OIDC_TOKEN_SOURCE: ${{ inputs.source }}

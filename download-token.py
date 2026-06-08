@@ -1,4 +1,4 @@
-# Fetch a cursed OIDC token from extremely-dangerous-public-oidc-beacon git
+# Fetch a cursed OIDC token from extremely-dangerous-public-oidc-beacon
 #
 # This script exists for a few reasons:
 # * Multiple sigstore-related projects need a non-expired OIDC token for testing
@@ -15,22 +15,33 @@
 # * use git to fetch token from "current-token" branch
 # * parse jwt just enough to check token validity
 # * retry a bit later if it is expired (or will soon expire)
+#
+# The token can alternatively be fetched from the GCS bucket by setting
+# OIDC_TOKEN_SOURCE=google. Note that the bucket serves a different identity
+# (a Google service account token) than the "current-token" branch (a GitHub
+# Actions token), so this is opt-in to avoid breaking existing consumers.
 
 from base64 import b64decode
 from datetime import datetime, timedelta
+from urllib.request import urlopen
 import json
 import sys
 from tempfile import TemporaryDirectory
 import logging
 import os
 import subprocess
-import shutil
 import time
 
 MIN_VALIDITY = timedelta(seconds=10)
 MAX_RETRY_TIME = timedelta(minutes=5)
 RETRY_SLEEP_SECS = 30
 GIT_URL = "https://github.com/sigstore-conformance/extremely-dangerous-public-oidc-beacon.git"
+GCS_URL = "https://storage.googleapis.com/sigstore-conformance-testing-token/untrusted-testing-token.txt"
+
+# "github" (default) clones the current-token git branch and yields a GitHub
+# Actions identity token; "google" fetches from the GCS bucket and yields a
+# Google service account identity token.
+SOURCE = os.environ.get("OIDC_TOKEN_SOURCE", "github")
 
 logger = logging.getLogger(__name__)
 
@@ -40,10 +51,29 @@ def git_clone(url: str, dir: str) -> None:
     subprocess.run(base_cmd + [url, dir], check=True)
 
 
-def is_valid_at(token_path: str, reference_time: datetime) -> bool:
-    # read token, b64 decode (with padding), parse as json, validate expiry
-    with open(token_path) as f:
-        payload = f.read().rstrip().split(".")[1]
+def fetch_from_branch() -> str:
+    with TemporaryDirectory() as tempdir:
+        git_clone(GIT_URL, tempdir)
+        with open(os.path.join(tempdir, "oidc-token.txt")) as f:
+            return f.read().rstrip()
+
+
+def fetch_from_gcs() -> str:
+    with urlopen(GCS_URL) as response:
+        return response.read().decode().strip()
+
+
+def fetch_token() -> str:
+    if SOURCE == "google":
+        return fetch_from_gcs()
+    if SOURCE == "github":
+        return fetch_from_branch()
+    sys.exit(f"Unknown OIDC_TOKEN_SOURCE {SOURCE!r}: expected 'github' or 'google'")
+
+
+def is_valid_at(token: str, reference_time: datetime) -> bool:
+    # b64 decode (with padding) the payload, parse as json, validate expiry
+    payload = token.split(".")[1]
     payload += "=" * (4 - len(payload) % 4)
     payload_json = json.loads(b64decode(payload))
 
@@ -60,14 +90,13 @@ def is_valid_at(token_path: str, reference_time: datetime) -> bool:
 
 start_time = datetime.now()
 while True:
-    with TemporaryDirectory() as tempdir:
-        git_clone(GIT_URL, tempdir)
+    token = fetch_token()
 
-        token_path = os.path.join(tempdir, "oidc-token.txt")
-        if is_valid_at(token_path, datetime.now() + MIN_VALIDITY):
-            shutil.copyfile(token_path, "./oidc-token.txt")
-            print("Downloaded valid token to ./oidc-token.txt")
-            break
+    if is_valid_at(token, datetime.now() + MIN_VALIDITY):
+        with open("./oidc-token.txt", "w") as f:
+            f.write(token)
+        print("Downloaded valid token to ./oidc-token.txt")
+        break
 
     if datetime.now() > start_time + MAX_RETRY_TIME:
         sys.exit(f"Failed to find a valid token in {MAX_RETRY_TIME}")
