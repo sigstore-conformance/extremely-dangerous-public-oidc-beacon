@@ -1,12 +1,21 @@
 # extremely-dangerous-public-oidc-beacon
 
-This repository publishes an OIDC identity token for testing purposes.
-This OIDC token should not be trusted, but it can be useful for testing
-Sigstore keyless signing and verification, see e.g. [conformance testing].
+> [!WARNING]
+> **This action is deprecated and will stop working soon.**
+>
+> All users should switch to the new test token, which is more reliable and has a longer time-to-live. The new token identity is:
+> * **Signing identity**: `untrusted-sa@sigstore-conformance.iam.gserviceaccount.com`
+> * **Issuer**: `https://accounts.google.com`
+>
+> To download it as a 1:1 replacement of running this action:
+>
+> ```bash
+> curl -sSfL https://storage.googleapis.com/sigstore-conformance-testing-token/untrusted-testing-token.txt -o oidc-token.txt
+> ```
 
-## Usage
+## Usage (Deprecated)
 
-The repository includes an action that will download the current token into
+The repository includes an action that will download the current token into the
 working directory (`./oidc-token.txt`):
 
     - uses: sigstore-conformance/extremely-dangerous-public-oidc-beacon@main
