@@ -7,6 +7,11 @@ runs:
   using: "composite"
 
   steps:
+    - name: Deprecation warning
+      run: |
+        echo "::warning title=Deprecated Action::extremely-dangerous-public-oidc-beacon is deprecated and will stop working soon. All users should switch.%0A%0A    To migrate, replace this action with:%0A    curl -sSfL https://storage.googleapis.com/sigstore-conformance-testing-token/untrusted-testing-token.txt -o oidc-token.txt%0A%0A    New token details:%0A    Identity = untrusted-sa@sigstore-conformance.iam.gserviceaccount.com%0A    Issuer = https://accounts.google.com"
+      shell: bash
+
     - name: Download token
       run: |
         python $GITHUB_ACTION_PATH/download-token.py
